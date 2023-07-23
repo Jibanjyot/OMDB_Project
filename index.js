@@ -190,6 +190,7 @@ function addComment(movieId) {
         return;
     }
     saveComment(commentInputText, movieId);
+    document.getElementById("commentInputText").value ="";
 }
 
 
