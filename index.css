@@ -22,6 +22,7 @@ button {
     color: #fff;
     border: none;
     cursor: pointer;
+    margin: 5px;
 }
 
 
@@ -49,21 +50,62 @@ button {
 
 .movie-card{
     display: flex;
-    background-color: #ccc;
-    max-width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    border: 2px solid black;
+    flex-direction: column;
     margin: 20px;
-    width: 20%;
-    /* height: 250px; */
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+
 }
+.movie-card:hover{
+    border-color: red;
+}
+
+.movie-card img {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px 8px 0 0;
+}
+
+.movie-info {
+    padding: 10px;
+}
+
+
 
 
 .movie-details{
     display: none;
     flex-direction: column;
+    width: 90%;
     border: 2px solid black;
-    background-color: aqua;
     margin: 20px;
+}
+
+
+.movie-details-container{
+    display: flex;
+    flex-direction: row;
+    background-color: aqua;
+}
+
+.movie-details-info-container{
+    padding: 10px;
+}
+
+.comment-container{
+    display: flex;
+    flex-direction: column;
+
+}
+
+.comment-container button{
+    width: 150px;
+}
+
+.comment-box-style{
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }

@@ -52,8 +52,11 @@ function displayMovieList(movies) {
         movieItem.id = movie.imdbID;
         movieItem.classList.add("movie-card")
         movieItem.innerHTML = `
-        <img src="${movie.Poster}" alt="${movie.Title}" width="100" >
-        <p>${movie.Title}</p>
+        <img src="${movie.Poster}" alt="${movie.Title} Poster">
+        <div class="movie-info">
+            <h2>${movie.Title}</h2>
+            <p><strong>Year:</strong> ${movie.Year}</p>
+        </div>
       `;
         movieListElement.appendChild(movieItem);
         movieItem.addEventListener('click', () => showMovieDetails(movie.imdbID));
@@ -70,21 +73,34 @@ async function showMovieDetails(movieId) {
     movieDetailsElement.style.display = "flex";
     movieDetailsElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
     movieDetailsElement.innerHTML = `
-            <div>
-                <h1>${data.Title}</h1>
-                <div>${data.Released} --- R --- ${data.Runtime}</div>
-                <div> <img src="${data.Poster}" /> </div>
-                <div><p>${data.Genre}</p></div>
-                <div><p>${data.Plot}</p></div>
-                <div><p>${data.Director}</p></div>
-                <div><p>${data.Writer}</p></div>
-                <div><p>${data.Actors}</p></div>
+        <div class="movie-details-container">
+            <img src="${data.Poster}" alt="${data.Title}">
+            <div class="movie-details-info-container">
+                <h2>${data.Title}</h2>
+                <p>Year:${data.Year}</p>
+                <p>Genre: ${data.Genre}</p>
+                <p>Director: ${data.Director}</p>
+                <p>Plot:${data.Plot}</p>
+                <div id="userRatingSection">
+                    <h3>User Rating</h3>
+                    <p>Average Rating: ${data.imdbRating}</p>
+                    <p>User Rating:<span id='averageUserRating'></span></p>
+                    <input type="number" id="userRating" min="1" max="5">
+                    <button id="submitRating" onclick="saveAndDisplayRating('${movieId}')">Submit Rating</button>
+                </div>
             </div>
+        </div>
+        <div class="comment-container">
             <input type="text" id="commentInputText" placeholder="Enter Comment" />
             <button id="addCommentButton" onclick="addComment('${movieId}')">Add Comment</button>
             <button id="viewCommentButton" onclick="displayComment('${movieId}')">View Comments</button>
-            <div id="commentListContainer">`;
-
+            
+        </div>
+        
+        <div id="commentListContainer">
+    `;
+    
+    displayRating(movieId);
 }
 
 let commentList = getcommentListFromLocalStorage();
@@ -101,16 +117,17 @@ function getcommentListFromLocalStorage() {
 
 
 
+
 // add comment
 function addComment(movieId) {
     console.log("add");
     let commentInputText = document.getElementById("commentInputText").value;
-    saveComment(commentInputText,movieId);
+    saveComment(commentInputText, movieId);
 }
 
 
-function saveComment(commentInputText,movieId) {
-    commentList.push({ movie_id:movieId,text: commentInputText });
+function saveComment(commentInputText, movieId) {
+    commentList.push({ movie_id: movieId, text: commentInputText });
     localStorage.setItem("comments", JSON.stringify(commentList));
     displayComment(movieId);
 }
@@ -121,10 +138,39 @@ function displayComment(movieId) {
     let commentListtoDisplay = commentList.filter(comment => comment.movie_id === movieId);
     commentListtoDisplay.forEach(comment => {
         const newCommentElement = document.createElement('div');
+        newCommentElement.classList.add("comment-box-style");
         newCommentElement.textContent = comment.text;
         commentListContainer.appendChild(newCommentElement);
     });
 }
 
 
+let ratingList = getratingListFromLocalStorage();
 
+function getratingListFromLocalStorage() {
+    let stringifiedratingList = localStorage.getItem("ratings");
+    let parsedratingList = JSON.parse(stringifiedratingList);
+    if (parsedratingList === null) {
+        return [];
+    } else {
+        return parsedratingList;
+    }
+}
+function saveAndDisplayRating(movieId){
+    let userRating = document.getElementById("userRating").value;
+    ratingList.push({ movie_id: movieId, rating: userRating });
+    localStorage.setItem("ratings", JSON.stringify(ratingList));
+    displayRating(movieId);
+}
+
+function displayRating(movieId){
+    let averageUserRating = document.getElementById("averageUserRating");
+    averageUserRating.innerHTML = "";
+    let ratingListtoDisplay = ratingList.filter(rating => rating.movie_id === movieId);
+    let sum = 0;
+    ratingListtoDisplay.forEach(rating => {
+        sum = sum+Number(rating.rating);
+    });
+    sum = sum*100;
+    averageUserRating.textContent = (Math.round(sum/(ratingListtoDisplay.length)))/100;
+}
