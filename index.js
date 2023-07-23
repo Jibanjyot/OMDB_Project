@@ -117,7 +117,7 @@ async function showMovieDetails(movieId) {
     // Display movie details in the movieDetails element
     const movieDetailsElement = document.getElementById('movieDetails');
     movieDetailsElement.style.display = "flex";
-    movieDetailsElement.scrollIntoView({ behavior: 'smooth', block: 'end',inline: 'nearest' });
+    
     movieDetailsElement.innerHTML = `
         <div class="movie-details-container">
             <img src="${data.Poster}" alt="${data.Title}">
@@ -145,7 +145,7 @@ async function showMovieDetails(movieId) {
         
         <div id="commentListContainer">
     `;
-    
+    movieDetailsElement.scrollIntoView({ behavior: 'smooth', block: 'start',inline: 'nearest' });
     displayRating(movieId);
 }
 
