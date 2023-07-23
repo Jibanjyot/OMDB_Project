@@ -5,7 +5,8 @@ const movieListElement = document.getElementById('movieList');
 const searchButton = document.getElementById("searchButton");
 const paginationBar = document.getElementById('pagination');
 
-
+let totalItems;
+let totalPages;
 searchButton.onclick = async function () {
     const searchBox = document.getElementById('movieSearch');
     const query = searchBox.value.trim();
@@ -17,23 +18,68 @@ searchButton.onclick = async function () {
     createPaginationBar(totalItems, 10, query);
 }
 
+let currentPage=1;
 function createPaginationBar(totalItems, itemsPerPage, query) {
     paginationBar.innerHTML = "";
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    totalPages = Math.ceil(totalItems / itemsPerPage);
     let paginationHTML = '';
+    paginationHTML += `<span class="pageNumber" onclick="goToPrevPage('${query}',${currentPage-1})" id="previous"><a>Previous</a></span>`
     for (let i = 1; i <= totalPages; i++) {
         paginationHTML += `<span class="pageNumber" onclick="goToPage('${query}',${i})" id="page${i}"><a>${i}</a></span>`;
     }
+    paginationHTML += `<span class="pageNumber" onclick="goToNextPage('${query}',${currentPage+1})" id="next"><a>Next</a></span>`
     paginationBar.innerHTML = paginationHTML;
 }
 
 async function goToPage(query, i) {
+    if(i<1){
+        i=1;
+    } 
+    if(i>totalPages){
+        i= totalPages;
+        return;
+    }
+    currentPage = i;
     let movies = await fetchMovies(query, i);
     movies = movies.Search || [];
     displayMovieList(movies);
     const paginationNumber = document.getElementById(`page${i}`);
     paginationNumber.style.color = "blue";
+    console.log(currentPage);
 }
+
+async function goToNextPage(query, i) {
+    if(currentPage<1){
+        currentPage=1;
+    } 
+    if(currentPage>totalPages){
+        currentPage= totalPages;
+    }
+    let movies = await fetchMovies(query, currentPage+1);
+    currentPage=currentPage+1;
+    movies = movies.Search || [];
+    displayMovieList(movies);
+    const paginationNumber = document.getElementById(`page${i}`);
+    paginationNumber.style.color = "blue";
+    console.log(currentPage);
+}
+
+async function goToPrevPage(query, i) {
+    if(currentPage<1){
+        currentPage=1;
+    } 
+    if(currentPage>totalPages){
+        currentPage= totalPages;
+    }
+    let movies = await fetchMovies(query, currentPage-1);
+    currentPage=currentPage-1;
+    movies = movies.Search || [];
+    displayMovieList(movies);
+    const paginationNumber = document.getElementById(`page${i}`);
+    paginationNumber.style.color = "blue";
+    console.log(currentPage);
+}
+
 
 
 async function fetchMovies(query, pageNumber) {
@@ -71,7 +117,7 @@ async function showMovieDetails(movieId) {
     // Display movie details in the movieDetails element
     const movieDetailsElement = document.getElementById('movieDetails');
     movieDetailsElement.style.display = "flex";
-    movieDetailsElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    movieDetailsElement.scrollIntoView({ behavior: 'smooth', block: 'end',inline: 'nearest' });
     movieDetailsElement.innerHTML = `
         <div class="movie-details-container">
             <img src="${data.Poster}" alt="${data.Title}">
@@ -122,6 +168,9 @@ function getcommentListFromLocalStorage() {
 function addComment(movieId) {
     console.log("add");
     let commentInputText = document.getElementById("commentInputText").value;
+    if(commentInputText == ""){
+        return;
+    }
     saveComment(commentInputText, movieId);
 }
 
