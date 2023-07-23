@@ -18,25 +18,25 @@ searchButton.onclick = async function () {
     createPaginationBar(totalItems, 10, query);
 }
 
-let currentPage=1;
+let currentPage = 1;
 function createPaginationBar(totalItems, itemsPerPage, query) {
     paginationBar.innerHTML = "";
     totalPages = Math.ceil(totalItems / itemsPerPage);
     let paginationHTML = '';
-    paginationHTML += `<span class="pageNumber" onclick="goToPrevPage('${query}',${currentPage-1})" id="previous"><a>Previous</a></span>`
+    paginationHTML += `<span class="pageNumber" onclick="goToPrevPage('${query}',${currentPage - 1})" id="previous"><a>Previous</a></span>`
     for (let i = 1; i <= totalPages; i++) {
         paginationHTML += `<span class="pageNumber" onclick="goToPage('${query}',${i})" id="page${i}"><a>${i}</a></span>`;
     }
-    paginationHTML += `<span class="pageNumber" onclick="goToNextPage('${query}',${currentPage+1})" id="next"><a>Next</a></span>`
+    paginationHTML += `<span class="pageNumber" onclick="goToNextPage('${query}',${currentPage + 1})" id="next"><a>Next</a></span>`
     paginationBar.innerHTML = paginationHTML;
 }
 
 async function goToPage(query, i) {
-    if(i<1){
-        i=1;
-    } 
-    if(i>totalPages){
-        i= totalPages;
+    if (i < 1) {
+        i = 1;
+    }
+    if (i > totalPages) {
+        i = totalPages;
         return;
     }
     currentPage = i;
@@ -49,14 +49,14 @@ async function goToPage(query, i) {
 }
 
 async function goToNextPage(query, i) {
-    if(currentPage<1){
-        currentPage=1;
-    } 
-    if(currentPage>totalPages){
-        currentPage= totalPages;
+    if (currentPage < 1) {
+        currentPage = 1;
     }
-    let movies = await fetchMovies(query, currentPage+1);
-    currentPage=currentPage+1;
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+    let movies = await fetchMovies(query, currentPage + 1);
+    currentPage = currentPage + 1;
     movies = movies.Search || [];
     displayMovieList(movies);
     const paginationNumber = document.getElementById(`page${i}`);
@@ -65,14 +65,14 @@ async function goToNextPage(query, i) {
 }
 
 async function goToPrevPage(query, i) {
-    if(currentPage<1){
-        currentPage=1;
-    } 
-    if(currentPage>totalPages){
-        currentPage= totalPages;
+    if (currentPage < 1) {
+        currentPage = 1;
     }
-    let movies = await fetchMovies(query, currentPage-1);
-    currentPage=currentPage-1;
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+    let movies = await fetchMovies(query, currentPage - 1);
+    currentPage = currentPage - 1;
     movies = movies.Search || [];
     displayMovieList(movies);
     const paginationNumber = document.getElementById(`page${i}`);
@@ -83,10 +83,16 @@ async function goToPrevPage(query, i) {
 
 
 async function fetchMovies(query, pageNumber) {
-    const response = await fetch(`${api_url}?apikey=${api_key}&s=${query}&page=${pageNumber}`);
-    console.log(`${api_url}?apikey=${api_key}&s=${query}`);
-    const data = await response.json();
-    return data;
+    try {
+        const response = await fetch(`${api_url}?apikey=${api_key}&s=${query}&page=${pageNumber}`);
+        console.log(`${api_url}?apikey=${api_key}&s=${query}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching movies:", error.message);
+
+        return { Search: [] };
+    }
 }
 
 
@@ -111,25 +117,30 @@ function displayMovieList(movies) {
 
 
 async function showMovieDetails(movieId) {
-    const response = await fetch(`${api_url}?apikey=${api_key}&i=${movieId}`);
-    const data = await response.json();
+    try {
+        const response = await fetch(`${api_url}?apikey=${api_key}&i=${movieId}`);
+        const data = await response.json();
+        if (response.ok) {
+            // Display movie details in the movieDetails element
+            const movieDetailsElement = document.getElementById('movieDetails');
+            movieDetailsElement.style.display = "flex";
 
-    // Display movie details in the movieDetails element
-    const movieDetailsElement = document.getElementById('movieDetails');
-    movieDetailsElement.style.display = "flex";
-    
-    movieDetailsElement.innerHTML = `
+            movieDetailsElement.innerHTML = `
         <div class="movie-details-container">
             <img src="${data.Poster}" alt="${data.Title}">
             <div class="movie-details-info-container">
                 <h2>${data.Title}</h2>
-                <p>Year:${data.Year}</p>
-                <p>Genre: ${data.Genre}</p>
-                <p>Director: ${data.Director}</p>
-                <p>Plot:${data.Plot}</p>
+                <p><strong>Year:</strong>${data.Year}</p>
+                <p><strong>Genre: </strong>${data.Genre}</p>
+                <p><strong>Director: </strong>${data.Director}</p>
+                <p><strong>Writer: </strong>${data.Writer}</p>
+                <p><strong>Cast: </strong>${data.Actors}</p>
+                <p><strong>Country: </strong>${data.Country}</p>
+                <p><strong>Production: </strong>${data.Production}</p>
+                <p><strong>Plot:</strong>${data.Plot}</p>
                 <div id="userRatingSection">
                     <h3>User Rating</h3>
-                    <p>Average Rating: ${data.imdbRating}</p>
+                    <p>IMDB Rating: ${data.imdbRating}</p>
                     <p>User Rating:<span id='averageUserRating'></span></p>
                     <input type="number" id="userRating" min="1" max="5">
                     <button id="submitRating" onclick="saveAndDisplayRating('${movieId}')">Submit Rating</button>
@@ -145,8 +156,15 @@ async function showMovieDetails(movieId) {
         
         <div id="commentListContainer">
     `;
-    movieDetailsElement.scrollIntoView({ behavior: 'smooth', block: 'start',inline: 'nearest' });
-    displayRating(movieId);
+            movieDetailsElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+            displayRating(movieId);
+        } else {
+            throw new Error(data.Error);
+        }
+    } catch (error) {
+        console.error("Error fetching movie details:", error.message);
+
+    }
 }
 
 let commentList = getcommentListFromLocalStorage();
@@ -168,7 +186,7 @@ function getcommentListFromLocalStorage() {
 function addComment(movieId) {
     console.log("add");
     let commentInputText = document.getElementById("commentInputText").value;
-    if(commentInputText == ""){
+    if (commentInputText == "") {
         return;
     }
     saveComment(commentInputText, movieId);
@@ -205,21 +223,21 @@ function getratingListFromLocalStorage() {
         return parsedratingList;
     }
 }
-function saveAndDisplayRating(movieId){
+function saveAndDisplayRating(movieId) {
     let userRating = document.getElementById("userRating").value;
     ratingList.push({ movie_id: movieId, rating: userRating });
     localStorage.setItem("ratings", JSON.stringify(ratingList));
     displayRating(movieId);
 }
 
-function displayRating(movieId){
+function displayRating(movieId) {
     let averageUserRating = document.getElementById("averageUserRating");
     averageUserRating.innerHTML = "";
     let ratingListtoDisplay = ratingList.filter(rating => rating.movie_id === movieId);
     let sum = 0;
     ratingListtoDisplay.forEach(rating => {
-        sum = sum+Number(rating.rating);
+        sum = sum + Number(rating.rating);
     });
-    sum = sum*100;
-    averageUserRating.textContent = (Math.round(sum/(ratingListtoDisplay.length)))/100;
+    sum = sum * 100;
+    averageUserRating.textContent = (Math.round(sum / (ratingListtoDisplay.length))) / 100;
 }
