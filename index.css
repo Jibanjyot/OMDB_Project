@@ -109,3 +109,24 @@ button {
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+#pagination{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+
+movie-details-container{
+    display: flex;
+    flex-direction: row;
+    background-color: aqua;
+}
+
+@media (max-width: 767px){
+    .movie-details-container{
+        flex-direction: column;
+    }
+    
+}
+
